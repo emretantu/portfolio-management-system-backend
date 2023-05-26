@@ -1,0 +1,577 @@
+Portfolio Management System API
+
+Introduction
+
+Welcome to the documentation for Our Portfolio Management System API. Our API is a RESTful web service that allows you to manage portfolios, transactions, and assets. With this API, you can create, read, update, and delete portfolios, transactions, and assets in your account. This documentation will provide you with the information you need to get started with our API.
+
+API Resources
+
+Portfolio
+
+The portfolios resource allows you to create, read, update portfolios. Here are the endpoits for this resource
+
+Version: 1.0 (/api/v1/portfolios/**)
+
+'GET /{userId}' - returns a list of portfolios by userId / It server to display the portfolios owned by the user.
+'POST /{userId}' - create a portfolio by using userId for user account.
+'PATCH /{portfolioId}' - updates portfolio information according to portfolio id. Status, name, currencyId etc.
+
+Transaction
+
+The transactions resource allows you to create, read, and delete transactions. Here are the endpoints for this resource
+
+Version: 1.0 (/api/v1/transactions/**)
+
+'GET /{userId}' - returns a list of transactions by userId.
+'POST /{userId}' - create transaction for user.
+'DELETE /{transactionId}' - delete transaction by userId.
+
+Asset
+
+The assets resource allows you to create and manage assets for the user. Here are the endpoints for this resource
+
+Version: 1.0 (/api/v1/assets/**)
+
+'GET /{userId}' - returns a list of assets by userId.
+'POST /{userId}' - create asset for user.
+'PATCH /{assetId}' - update asset infromation according to assetId. Name, currencyId, assetTypeId, status etc.
+
+Asset Type
+
+The asset types resource allows you to create custom assets as well as we have bunch of default assets.
+
+Version: 1.0 (/api/v1/asset-types/**)
+
+'GET /{userId}' - allows us to access the asset types owned by the user.
+'POST /{assetId}' - allows us to create asset type by using asset Id.
+'PATCH /{assetId}' - allows us to update asset type by asset Id. Name etc.
+
+Asset Track
+
+The asset track resourse allows you to trace asset current data.
+
+Version: 1.0 (/api/v1/asset-tracks/**)
+
+'POST /{assetId}' allows us to create a data related to the asset.
+
+Transaction Type
+
+The transaction types resourse allows you to display default transaction types.
+
+Version: 1.0 (/api/v1/transaction-types/**)
+
+'GET' - returns a list of all transaction types.
+
+Currency
+
+The currency types resource allows you to see the currencies defined in the system.
+
+'GET' - returns a list of all currencies defined in the system.
+
+http://localhost:8765/api/v1/portfolios/1 (GET)
+******************************************
+{
+"id": 1,
+"userId": 1,
+"name": "Retirement Portfolio",
+"currencyId": 1,
+"shareTransactions": [
+{
+"id": 1,
+"changeOfQuantity": 100.000000,
+"changeOfCost": 1000,
+"timestamp": "2023-05-16T10:30:39.834+00:00"
+},
+{
+"id": 2,
+"changeOfQuantity": -50.000000,
+"changeOfCost": -500,
+"timestamp": "2023-05-16T10:30:39.834+00:00"
+},
+{
+"id": 11,
+"changeOfQuantity": 200.456700,
+"changeOfCost": 51,
+"timestamp": "2023-05-16T10:30:39.834+00:00"
+},
+{
+"id": 13,
+"changeOfQuantity": 250.456700,
+"changeOfCost": 150,
+"timestamp": "2023-05-16T10:30:39.834+00:00"
+}
+]
+},
+*************************************************************
+
+http://localhost:8765/api/v1/portfolios/1 (POST)
+
+BODY:
+{
+"name":"denemejskdfklfd",
+"currencyId":4,
+"initialChangeOfCost":8000
+}
+*************************************************************
+OLD RESPONSE:
+{
+"id": 27,
+"userId": 3,
+"name": "denemejskdfklfd",
+"currency": {
+"id": 4,
+"name": "TRY"
+},
+"status": true
+}
+NEW RESPONSE:
+{
+"statusCode": 201,
+"message": "Portfolio created successfully",
+"timestamp": "2023-05-17T09:33:15.162+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/portfolios/26 (PATCH)
+
+BODY:
+{
+"name":"TwentySix Portfolio",
+"currencyId":4,
+"status":false
+}
+
+*************************************************************
+OLD RESPONSE:
+{
+"id": 26,
+"userId": 1,
+"name": "TwentySix Portfolio",
+"currency": {
+"id": 4,
+"name": "TRY"
+},
+"status": false
+}
+NEW RESPONSE:
+{
+"statusCode": 201,
+"message": "Portfolio updated successfully",
+"timestamp": "2023-05-17T09:48:53.485+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/transactions/2 (GET)
+*************************************************************
+ {
+        "id": 10,
+        "portfolioId": 4,
+        "assetId": 10,
+        "transactionTypeId": 1,
+        "changeOfQuantity": 25.000000,
+        "changeOfMainCost": 1250,
+        "changeOfPortfolioCost": 31250,
+        "time": "2023-05-14T10:47:55.025+00:00"
+    }
+*************************************************************
+
+
+http://localhost:8765/api/v1/transactions/1 (POST)
+*************************************************************
+{
+        "portfolioId":1,
+        "assetId": 1,
+        "transactionTypeId": 1,
+        "changeOfQuantity": 500.4567,
+        "changeOfMainCost": 760.678,
+        "changeOfPortfolioCost": 12.87
+}
+
+*************************************************************
+OLD RESPONSE:
+{
+"id": 15,
+"portfolio": {
+"id": 1,
+"userId": 1,
+"name": "Retirement Portfolio",
+"currency": {
+"id": 1,
+"name": "USD"
+},
+"status": true
+},
+"asset": {
+"id": 1,
+"name": "Apple",
+"currency": {
+"id": 1,
+"name": "USD"
+},
+"assetType": {
+"id": 1,
+"name": "Stocks"
+},
+"userId": 1,
+"status": true
+},
+"transactionType": {
+"id": 1,
+"name": "Buy"
+},
+"changeOfQuantity": 500.4567,
+"changeOfMainCost": 760,
+"changeOfPortfolioCost": 12.87,
+"time": "2023-05-16T10:41:06.549+00:00"
+}
+NEW RESPONSE:
+{
+"statusCode": 201,
+"message": "Transaction created successfully",
+"timestamp": "2023-05-17T09:50:22.903+00:00"
+}
+*************************************************************
+
+http://localhost:8765/api/v1/transactions/16 (DELETE)
+
+*************************************************************
+OLD RESPONSE:
+transaction deleted with id - 16
+NEW RESPONSE:
+{
+"statusCode": 201,
+"message": "Transaction deleted successfully with id - 16",
+"timestamp": "2023-05-17T09:52:04.593+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/assets/1 (GET)
+*************************************************************
+{
+"id": 1,
+"name": "Apple",
+"currencyId": 1,
+"assetTypeId": 1,
+"userId": 1,
+"status": true,
+"assetTrackList": [
+{
+"id": 1,
+"assetId": 1,
+"value": 100,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 2,
+"assetId": 1,
+"value": 102,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 3,
+"assetId": 1,
+"value": 98,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 4,
+"assetId": 1,
+"value": 101,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 5,
+"assetId": 1,
+"value": 99,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 11,
+"assetId": 1,
+"value": 123,
+"time": "2023-05-16T10:46:51.096+00:00"
+},
+{
+"id": 12,
+"assetId": 1,
+"value": 200,
+"time": "2023-05-16T10:46:51.096+00:00"
+}
+]
+}
+
+http://localhost:8765/api/v1/assets/3 (GET)
+*************************************************************
+{
+"id": 17,
+"name": "TestAsset",
+"currencyId": 8,
+"assetTypeId": 5,
+"userId": 3,
+"status": true,
+"assetTrackList": [
+{
+"id": 13,
+"assetId": 17,
+"value": 125,
+"time": "2023-05-16T10:50:22.842+00:00"
+}
+]
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/assets/3 (POST) (HATA GİDERİLDİ!)
+
+BODY:
+{
+"name":"TestAsset",
+"currencyId":8,
+"assetTypeId":5,
+"status":true
+}
+*************************************************************
+OLD RESPONSE:
+{
+"id": 17,
+"name": "TestAsset",
+"currency": {
+"id": 8,
+"name": "CHF"
+},
+"assetType": {
+"id": 5,
+"name": "Real Estate"
+},
+"userId": 3,
+"status": true
+}
+NEW RESPONSE:
+{
+"id": 21,
+"statusCode": 201,
+"message": "Asset created successfully",
+"timestamp": "2023-05-17T10:00:32.183+00:00"
+}
+*************************************************************
+
+http://localhost:8765/api/v1/assets/17 (PATCH)
+
+BODY:
+{
+"name":"AssetMySevenTeen",
+"currencyId":2,
+"assetTypeId":4,
+"status":false
+
+}
+
+*************************************************************
+OLD RESPONSE:
+{
+"id": 17,
+"name": "AssetMySevenTeen",
+"currency": {
+"id": 2,
+"name": "EUR"
+},
+"assetType": {
+"id": 4,
+"name": "Commodities"
+},
+"userId": 3,
+"status": false
+}
+NEW RESPONSE:
+{
+"statusCode": 200,
+"message": "Asset updated successfully",
+"timestamp": "2023-05-17T10:01:34.907+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/asset-types/3 (GET)
+*************************************************************
+[
+    {
+        "id": 1,
+        "name": "Stocks"
+    },
+    {
+        "id": 2,
+        "name": "Bonds"
+    },
+    {
+        "id": 3,
+        "name": "Funds"
+    },
+    {
+        "id": 4,
+        "name": "Commodities"
+    }
+]
+*************************************************************
+
+
+http://localhost:8765/api/v1/asset-types (POST)
+
+BODY:
+{
+"name":"myasset2348"
+}
+*************************************************************
+RESPONSE:
+{
+"id": 15,
+"statusCode": 201,
+"message": "Asset Type created successfully",
+"timestamp": "2023-05-17T10:09:44.459+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/asset-types/15 (PATCH)
+
+BODY:
+{
+"name":"myasset87654321"
+}
+*************************************************************
+RESPONSE:
+{
+"statusCode": 200,
+"message": "Asset Type updated successfully",
+"timestamp": "2023-05-17T10:17:20.797+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/asset-tracks/17 (POST)
+
+BODY:
+{
+"value":345.675
+}
+*************************************************************
+OLD RESPONSE:
+{
+"id": 14,
+"value": 200,
+"timestamp": "2023-05-16T10:57:40.458+00:00"
+}
+NEW RESPONSE:
+{
+"statusCode": 201,
+"message": "Asset Track created successfully",
+"timestamp": "2023-05-17T10:21:49.296+00:00"
+}
+*************************************************************
+
+
+http://localhost:8765/api/v1/transaction-types (GET)
+*************************************************************
+[
+    {
+        "id": 1,
+        "name": "Buy"
+    },
+    {
+        "id": 2,
+        "name": "Sell"
+    },
+    {
+        "id": 3,
+        "name": "Dividend"
+    },
+    {
+        "id": 4,
+        "name": "Interest"
+    },
+    {
+        "id": 5,
+        "name": "Transfer"
+    },
+    {
+        "id": 6,
+        "name": "Withdrawal"
+    },
+    {
+        "id": 7,
+        "name": "Deposit"
+    },
+    {
+        "id": 8,
+        "name": "Option Exercise"
+    },
+    {
+        "id": 9,
+        "name": "Futures Settlement"
+    },
+    {
+        "id": 10,
+        "name": "Margin Call"
+    }
+]
+*************************************************************
+
+
+http://localhost:8765/api/v1/currencies (GET)
+*************************************************************
+[
+    {
+        "id": 1,
+        "name": "USD"
+    },
+    {
+        "id": 2,
+        "name": "EUR"
+    },
+    {
+        "id": 3,
+        "name": "GBP"
+    },
+    {
+        "id": 4,
+        "name": "TRY"
+    },
+    {
+        "id": 5,
+        "name": "JPY"
+    },
+    {
+        "id": 6,
+        "name": "CAD"
+    },
+    {
+        "id": 7,
+        "name": "AUD"
+    },
+    {
+        "id": 8,
+        "name": "CHF"
+    },
+    {
+        "id": 9,
+        "name": "NZD"
+    },
+    {
+        "id": 10,
+        "name": "SEK"
+    }
+]
+*************************************************************
+
+
+
+
+
+
+
+
+
+
+
