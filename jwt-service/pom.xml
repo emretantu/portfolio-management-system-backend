@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.pmsystemtest.microservices</groupId>
 	<artifactId>jwt-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>v1.0</version>
 	<name>jwt-service</name>
 	<description>Authentication</description>
 	<properties>

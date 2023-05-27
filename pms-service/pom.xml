@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.pmsystemtest.microservices</groupId>
 	<artifactId>pms-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>v1.0</version>
 	<name>pms-service</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
