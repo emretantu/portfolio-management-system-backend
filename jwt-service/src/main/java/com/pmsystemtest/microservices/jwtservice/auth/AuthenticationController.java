@@ -1,9 +1,13 @@
 package com.pmsystemtest.microservices.jwtservice.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,6 +27,14 @@ public class AuthenticationController {
             @RequestBody AuthenticationRequest request
     ){
         return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthenticationResponse> register(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        return ResponseEntity.ok(service.refreshToken(request, response));
     }
 
     @PostMapping("/validate")

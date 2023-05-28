@@ -6,9 +6,14 @@ import com.pmsystemtest.microservices.jwtservice.entity.Token;
 import com.pmsystemtest.microservices.jwtservice.entity.TokenType;
 import com.pmsystemtest.microservices.jwtservice.entity.User;
 import com.pmsystemtest.microservices.jwtservice.exception.DuplicateEmailException;
+import com.pmsystemtest.microservices.jwtservice.exception.MissingTokenException;
+import com.pmsystemtest.microservices.jwtservice.exception.UserNotFoundException;
 import com.pmsystemtest.microservices.jwtservice.repository.TokenRepository;
 import com.pmsystemtest.microservices.jwtservice.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -34,7 +40,6 @@ public class AuthenticationService {
         if(userOptional.isPresent()){
             throw new DuplicateEmailException();
         }
-
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
@@ -44,9 +49,11 @@ public class AuthenticationService {
                 .build();
         var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -75,10 +82,12 @@ public class AuthenticationService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -107,5 +116,34 @@ public class AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(token);
+    }
+
+    public AuthenticationResponse refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String userEmail;
+        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+            throw new MissingTokenException();
+        }
+        refreshToken = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(refreshToken);
+        if(userEmail != null){
+            var user = this.repository.findByEmail(userEmail)
+                    .orElseThrow();
+            if(jwtService.isTokenValid(refreshToken, user)) {
+                var accessToken = jwtService.generateToken(user);
+                revokeAllUserTokens(user);
+                saveUserToken(user, accessToken);
+                return AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+            }
+
+        }
+        return null;
     }
 }
