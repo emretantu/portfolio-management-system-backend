@@ -50,4 +50,12 @@ public class AuthenticationController {
                 .build();
         return new ResponseEntity<>(validateResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/token")
+    public ResponseEntity<UserIdResponse> findUserIdByToken(@RequestBody TokenRequest request){
+        UserIdResponse userIdResponse = UserIdResponse.builder()
+                .userId(service.findUserByToken(request.getToken()))
+                .build();
+        return ResponseEntity.ok(userIdResponse);
+    }
 }
