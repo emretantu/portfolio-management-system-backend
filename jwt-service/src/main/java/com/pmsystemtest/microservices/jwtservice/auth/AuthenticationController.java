@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -18,7 +19,13 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<?> register(
+            @RequestBody RegisterRequest request
+    ){
+        List<String> validationErrors = request.getValidationErrors();
+        if (!validationErrors.isEmpty()) {
+            return ResponseEntity.badRequest().body(validationErrors);
+        }
         return ResponseEntity.ok(service.register(request));
     }
 
