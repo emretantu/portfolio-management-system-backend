@@ -29,7 +29,7 @@ public class ShareTransaction {
     @Column(name = "change_of_quantity")
     private BigDecimal changeOfQuantity;
 
-    @Column(name = "change_of_cost")
+    @Column(name = "change_of_cost", columnDefinition = "bigint")
     private BigInteger changeOfCost;
 
     @Column(name = "time")
