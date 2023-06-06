@@ -97,6 +97,12 @@ public class AuthenticationService {
         return false;
     }
 
+    public Long findUserByToken(String token){
+        String email = jwtService.extractUsername(token);
+        var user = repository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return user.getId();
+    }
+
 
     public boolean validateWithKey(String token) {
         return jwtService.isTokenValidWithKey(token);
