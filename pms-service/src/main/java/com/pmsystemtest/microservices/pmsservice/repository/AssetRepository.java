@@ -15,4 +15,5 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
 
     Optional<Asset> findByUserIdAndId(Long user_id, Long asset_id);
 
+    Optional<Asset> findUserIdById(Long assetId);
 }

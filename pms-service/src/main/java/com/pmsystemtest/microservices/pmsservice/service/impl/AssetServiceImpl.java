@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.service.impl;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.dto.AssetDTO;
 import com.pmsystemtest.microservices.pmsservice.dto.AssetTrackDTO;
 import com.pmsystemtest.microservices.pmsservice.entity.Asset;
@@ -8,6 +9,7 @@ import com.pmsystemtest.microservices.pmsservice.entity.Currency;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.AssetNotFoundException;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.AssetTypeNotFoundException;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.CurrencyNotFoundException;
+import com.pmsystemtest.microservices.pmsservice.exceptions.responses.SuccessResponse;
 import com.pmsystemtest.microservices.pmsservice.repository.AssetRepository;
 import com.pmsystemtest.microservices.pmsservice.repository.AssetTrackRepository;
 import com.pmsystemtest.microservices.pmsservice.repository.AssetTypeRepository;
@@ -15,7 +17,10 @@ import com.pmsystemtest.microservices.pmsservice.repository.CurrencyRepository;
 import com.pmsystemtest.microservices.pmsservice.service.AssetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -31,6 +36,7 @@ public class AssetServiceImpl implements AssetService {
     private final AssetTrackRepository theAssetTrackRepository;
     private final CurrencyRepository theCurrencyRepository;
     private final AssetTypeRepository theAssetTypeRepository;
+    private final TokenValidator tokenValidator;
 
 
 
@@ -104,14 +110,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public Asset updateAsset(AssetDTO assetDTO, Long assetId) {
+    public ResponseEntity<SuccessResponse> updateAsset(AssetDTO assetDTO, Long assetId, String token) {
 
-        Optional<Asset> assetOptional = theAssetRepository.findById(assetId);
-        Asset asset = null;
-        if(assetOptional.isPresent()){
-            asset = assetOptional.get();
-        }else{
-            throw new AssetNotFoundException();
+        Asset asset = theAssetRepository.findUserIdById(assetId).orElseThrow(AssetTypeNotFoundException::new);
+        if(!tokenValidator.checkTokenByUserId(asset.getUserId(), token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
         }
 
         if(assetDTO.getName() != null){
@@ -143,6 +146,15 @@ public class AssetServiceImpl implements AssetService {
         if(assetDTO.getStatus() != null){
             asset.setStatus(assetDTO.getStatus());
         }
-        return theAssetRepository.save(asset);
+
+        asset = theAssetRepository.save(asset);
+
+        SuccessResponse successResponse = SuccessResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Asset updated successfully")
+                .timestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 }

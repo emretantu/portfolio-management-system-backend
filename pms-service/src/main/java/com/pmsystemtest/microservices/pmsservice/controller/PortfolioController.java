@@ -32,22 +32,6 @@ public class PortfolioController {
     private final TokenValidator tokenValidator;
 
 
-
-    /*@GetMapping
-    public List<Portfolio> retrieveAllPortfolios(){
-        return thePortfolioService.findAll();
-    }*/
-
-    /*@GetMapping("/{portfolio_id}")
-    public Portfolio retrievePortfolio(@PathVariable Long portfolio_id){
-        return thePortfolioService.findById(portfolio_id);
-    }*/
-
-    /*@GetMapping("/all")
-    public List<PortfolioShareTransactionDTO> getAllPortfolioShareTransactions(){
-        return thePortfolioService.getAllPortfolioShareTransactionDtos();
-    }*/
-
     @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<PortfolioShareTransactionDTO> retrievePortfolioByUser(
             @PathVariable Long userId,
@@ -67,10 +51,6 @@ public class PortfolioController {
 
         return thePortfolioService.getAllPortfolioShareTransactionDtos(userId);
 
-
-
-        //return thePortfolioService.findByUserId(user_id);
-        //return portfolio;
     }
 
     @PostMapping("/{userId}")
