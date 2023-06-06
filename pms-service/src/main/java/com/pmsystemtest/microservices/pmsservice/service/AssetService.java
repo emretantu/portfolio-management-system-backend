@@ -2,6 +2,8 @@ package com.pmsystemtest.microservices.pmsservice.service;
 
 import com.pmsystemtest.microservices.pmsservice.dto.AssetDTO;
 import com.pmsystemtest.microservices.pmsservice.entity.Asset;
+import com.pmsystemtest.microservices.pmsservice.exceptions.responses.SuccessResponse;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -13,5 +15,5 @@ public interface AssetService {
 
     Asset createAsset(AssetDTO assetDTO, Long userId);
 
-    Asset updateAsset(AssetDTO assetDTO, Long assetId);
+    ResponseEntity<SuccessResponse> updateAsset(AssetDTO assetDTO, Long assetId, String token);
 }

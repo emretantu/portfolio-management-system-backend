@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.controller;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.dto.AssetTypeDTO;
 import com.pmsystemtest.microservices.pmsservice.entity.AssetType;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.AssetTypeNotFoundException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -25,7 +27,7 @@ public class AssetTypeController {
 
     private final AssetTypeService theAssetTypeService;
     private final UserProxy theUserProxy;
-
+    private final TokenValidator tokenValidator;
 
 
     @GetMapping
@@ -34,22 +36,25 @@ public class AssetTypeController {
     }
 
     @GetMapping("/{userId}")
-    public List<AssetType> retrieveAssetTypesByUserId(@PathVariable Long userId){
-        boolean status = theUserProxy.isExistUser(userId);
-        if(!status){
-            throw new RuntimeException("hatali giris");
+    public List<AssetType> retrieveAssetTypesByUserId(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authorizationHeader
+    ){
+        String token = authorizationHeader.substring(7);
+        theUserProxy.isExistUser(userId);
+
+        if(!tokenValidator.checkTokenByUserId(userId, token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
         }
+
 
         return theAssetTypeService.findAllAssetTypesByUserId(userId);
     }
 
-    /*@GetMapping("/{assetId}")
-    public AssetType retrieveOneAsset(@PathVariable Long assetId){
-        return theAssetTypeService.findById(assetId);
-    }*/
-
     @PostMapping
-    public ResponseEntity<AssetPostResponse> createAsset(@Valid @RequestBody AssetTypeDTO assetTypeDTO){
+    public ResponseEntity<AssetPostResponse> createAsset(
+            @Valid @RequestBody AssetTypeDTO assetTypeDTO
+    ){
         AssetPostResponse assetPostResponse  = null;
 
         AssetType assetType = theAssetTypeService.save(assetTypeDTO);
@@ -66,7 +71,10 @@ public class AssetTypeController {
     }
 
     @PatchMapping("/{assetTypeId}")
-    public ResponseEntity<SuccessResponse> updateAsset(@Valid @RequestBody AssetTypePatchRequest patchRequest, @PathVariable Long assetTypeId){
+    public ResponseEntity<SuccessResponse> updateAsset(
+            @Valid @RequestBody AssetTypePatchRequest patchRequest,
+            @PathVariable Long assetTypeId
+    ){
         AssetType existingAssetType = theAssetTypeService.findById(assetTypeId);
         if(existingAssetType == null){
             throw new AssetTypeNotFoundException();
