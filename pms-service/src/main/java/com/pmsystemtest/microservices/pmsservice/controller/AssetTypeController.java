@@ -29,24 +29,13 @@ public class AssetTypeController {
     private final UserProxy theUserProxy;
     private final TokenValidator tokenValidator;
 
-
-    @GetMapping
-    public List<AssetType> retrieveAllAssets(){
-        return theAssetTypeService.findAll();
-    }
-
-    @GetMapping("/{userId}")
+    @GetMapping()
     public List<AssetType> retrieveAssetTypesByUserId(
-            @PathVariable Long userId,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         String token = authorizationHeader.substring(7);
+        Long userId = tokenValidator.getUserIdByToken(token);
         theUserProxy.isExistUser(userId);
-
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
-
 
         return theAssetTypeService.findAllAssetTypesByUserId(userId);
     }
