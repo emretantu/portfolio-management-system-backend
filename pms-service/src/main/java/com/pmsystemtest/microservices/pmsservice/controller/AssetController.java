@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.controller;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.dto.AssetDTO;
 import com.pmsystemtest.microservices.pmsservice.entity.Asset;
 import com.pmsystemtest.microservices.pmsservice.exceptions.responses.AssetPostResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -24,26 +26,40 @@ public class AssetController {
 
     private final AssetService theAssetService;
     private final UserProxy theUserProxy;
+    private final TokenValidator tokenValidator;
 
 
 
     @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<AssetDTO> retrieveAssetsByUserId(@PathVariable Long userId){
+    public List<AssetDTO> retrieveAssetsByUserId(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authorizationHeader
+    ){
 
-        boolean status = theUserProxy.isExistUser(userId);
-        if(!status){
-            throw new RuntimeException("hatali giris");
+        String token = authorizationHeader.substring(7);
+
+        theUserProxy.isExistUser(userId);
+
+        if(!tokenValidator.checkTokenByUserId(userId, token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
         }
+
         return theAssetService.findAssetsByUserId(userId);
 
 
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<AssetPostResponse> createAsset(@PathVariable Long userId, @Valid @RequestBody AssetDTO assetDTO){
-        boolean status = theUserProxy.isExistUser(userId);
-        if(!status){
-            throw new RuntimeException("hatali giris");
+    public ResponseEntity<AssetPostResponse> createAsset(
+            @PathVariable Long userId,
+            @Valid @RequestBody AssetDTO assetDTO,
+            @RequestHeader("Authorization") String authorizationHeader
+    ){
+        String token = authorizationHeader.substring(7);
+        theUserProxy.isExistUser(userId);
+
+        if(!tokenValidator.checkTokenByUserId(userId, token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
         }
 
         AssetPostResponse assetPostResponse  = null;
@@ -61,17 +77,13 @@ public class AssetController {
     }
 
     @PatchMapping("/{assetId}")
-    public ResponseEntity<SuccessResponse> updateAsset(@PathVariable Long assetId, @RequestBody AssetDTO assetDTO){
-
-        SuccessResponse successResponse = null;
-        if(theAssetService.updateAsset(assetDTO, assetId) != null){
-            successResponse = SuccessResponse.builder()
-                    .statusCode(HttpStatus.OK.value())
-                    .message("Asset updated successfully")
-                    .timestamp(new Timestamp(System.currentTimeMillis()))
-                    .build();
-        }
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+    public ResponseEntity<SuccessResponse> updateAsset(
+            @PathVariable Long assetId,
+            @RequestBody AssetDTO assetDTO,
+            @RequestHeader("Authorization") String authorizationHeader
+    ){
+        String token = authorizationHeader.substring(7);
+        return theAssetService.updateAsset(assetDTO, assetId, token);
 
     }
 

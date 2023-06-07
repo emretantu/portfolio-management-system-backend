@@ -35,4 +35,17 @@ public class CustomExceptionHandler {
                 .build();
         return new ResponseEntity<>(baseResponse, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(MissingTokenException.class)
+    public ResponseEntity<BaseResponse> handleNotFoundException(MissingTokenException ex) {
+        String errorMessage = "missing token";
+        String exceptionType = ex.getClass().getSimpleName();
+        BaseResponse baseResponse = BaseResponse.builder()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .exceptionType(exceptionType)
+                .message(errorMessage)
+                .timestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+        return new ResponseEntity<>(baseResponse, HttpStatus.NOT_FOUND);
+    }
 }

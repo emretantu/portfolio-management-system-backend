@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.service.impl;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.dto.PortfolioDTO;
 import com.pmsystemtest.microservices.pmsservice.dto.PortfolioShareTransactionDTO;
 import com.pmsystemtest.microservices.pmsservice.dto.ShareTransactionDTO;
@@ -8,13 +9,17 @@ import com.pmsystemtest.microservices.pmsservice.entity.Portfolio;
 import com.pmsystemtest.microservices.pmsservice.entity.ShareTransaction;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.CurrencyNotFoundException;
 import com.pmsystemtest.microservices.pmsservice.exceptions.customexceptions.PortfolioNotFoundException;
+import com.pmsystemtest.microservices.pmsservice.exceptions.responses.SuccessResponse;
 import com.pmsystemtest.microservices.pmsservice.repository.CurrencyRepository;
 import com.pmsystemtest.microservices.pmsservice.repository.PortfolioRepository;
 import com.pmsystemtest.microservices.pmsservice.repository.ShareTransactionRepository;
 import com.pmsystemtest.microservices.pmsservice.request.PortfolioRequest;
 import com.pmsystemtest.microservices.pmsservice.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -30,6 +35,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     private final PortfolioRepository thePortfolioRepository;
     private final ShareTransactionRepository theTransactionRepository;
     private final CurrencyRepository theCurrencyRepository;
+    private final TokenValidator tokenValidator;
 
     @Override
     public List<Portfolio> findAll() {
@@ -88,13 +94,11 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public Portfolio updatePortfolio(PortfolioDTO portfolioDTO, Long portfolioId) {
-        Optional<Portfolio> portfolioOptional = thePortfolioRepository.findById(portfolioId);
-        Portfolio portfolio = null;
-        if(portfolioOptional.isPresent()){
-            portfolio = portfolioOptional.get();
-        }else{
-            throw new PortfolioNotFoundException();
+    public ResponseEntity<SuccessResponse> updatePortfolio(PortfolioDTO portfolioDTO, Long portfolioId, String token) {
+
+        Portfolio portfolio = thePortfolioRepository.findUserIdById(portfolioId).orElseThrow(PortfolioNotFoundException::new);
+        if(!tokenValidator.checkTokenByUserId(portfolio.getUserId(), token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
         }
 
         if(portfolioDTO.getStatus() != null){
@@ -118,7 +122,13 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         portfolio = thePortfolioRepository.save(portfolio);
 
-        return portfolio;
+        SuccessResponse successResponse = SuccessResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Portfolio updated successfully")
+                .timestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @Override
@@ -178,5 +188,10 @@ public class PortfolioServiceImpl implements PortfolioService {
         }
 
         return portfolio.getShareTransactionList();
+    }
+
+    @Override
+    public Portfolio findUserIdById(Long portfolioId) {
+        return thePortfolioRepository.findUserIdById(portfolioId).orElse(null);
     }
 }

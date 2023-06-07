@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.controller;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.dto.AssetTrackDTO;
 import com.pmsystemtest.microservices.pmsservice.exceptions.responses.SuccessResponse;
 import com.pmsystemtest.microservices.pmsservice.service.AssetTrackService;
@@ -20,18 +21,14 @@ public class AssetTrackController {
     private final AssetTrackService theAssetTrackService;
 
     @PostMapping("/{assetId}")
-    public ResponseEntity<SuccessResponse> createAssetTrackData(@PathVariable Long assetId, @Valid @RequestBody AssetTrackDTO assetTrackDTO){
+    public ResponseEntity<SuccessResponse> createAssetTrackData(
+            @PathVariable Long assetId,
+            @Valid @RequestBody AssetTrackDTO assetTrackDTO,
+            @RequestHeader("Authorization") String authorizationHeader
+    ){
+        String token = authorizationHeader.substring(7);
 
-        SuccessResponse successResponse = null;
-        if(theAssetTrackService.createAssetTrack(assetTrackDTO, assetId) != null){
-            successResponse = SuccessResponse.builder()
-                    .statusCode(HttpStatus.CREATED.value())
-                    .message("Asset Track created successfully")
-                    .timestamp(new Timestamp(System.currentTimeMillis()))
-                    .build();
-        }
-
-        return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
+        return theAssetTrackService.createAssetTrack(assetTrackDTO, assetId, token);
     }
 
 }

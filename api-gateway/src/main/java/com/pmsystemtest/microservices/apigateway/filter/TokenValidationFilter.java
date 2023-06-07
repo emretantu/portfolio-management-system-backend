@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class TokenValidationFilter implements GatewayFilter {
 
     private final WebClient webClient;
+    private final String tokenHeader = "Authorization";
 
 
 
@@ -40,7 +41,10 @@ public class TokenValidationFilter implements GatewayFilter {
         return validateToken(token)
                 .flatMap(isValid -> {
                     if (isValid) {
-                        return chain.filter(exchange);
+                        ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                                .header(tokenHeader, "Bearer " + token)
+                                .build();
+                        return chain.filter(exchange.mutate().request(modifiedRequest).build());
                     } else {
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
