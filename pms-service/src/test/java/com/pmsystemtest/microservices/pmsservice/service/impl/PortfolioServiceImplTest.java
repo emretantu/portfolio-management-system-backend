@@ -1,5 +1,6 @@
 package com.pmsystemtest.microservices.pmsservice.service.impl;
 
+import com.pmsystemtest.microservices.pmsservice.config.TokenValidator;
 import com.pmsystemtest.microservices.pmsservice.entity.Currency;
 import com.pmsystemtest.microservices.pmsservice.entity.Portfolio;
 import com.pmsystemtest.microservices.pmsservice.entity.ShareTransaction;
@@ -27,13 +28,15 @@ class PortfolioServiceImplTest {
     private  PortfolioRepository thePortfolioRepository;
     private  ShareTransactionRepository theTransactionRepository;
     private  CurrencyRepository theCurrencyRepository;
+    private TokenValidator tokenValidator;
 
     @BeforeEach
     void setUp() {
         thePortfolioRepository = Mockito.mock(PortfolioRepository.class);
         theTransactionRepository = Mockito.mock(ShareTransactionRepository.class);
         theCurrencyRepository = Mockito.mock(CurrencyRepository.class);
-        portfolioService = new PortfolioServiceImpl(thePortfolioRepository, theTransactionRepository, theCurrencyRepository);
+        tokenValidator = Mockito.mock(TokenValidator.class);
+        portfolioService = new PortfolioServiceImpl(thePortfolioRepository, theTransactionRepository, theCurrencyRepository, tokenValidator);
     }
 
     @Test
