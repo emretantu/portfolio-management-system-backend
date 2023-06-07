@@ -28,33 +28,27 @@ public class TransactionController {
 
 
 
-    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public List<TransactionDTO> findAllTransactionsByUserId(
-            @PathVariable Long userId,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         String token = authorizationHeader.substring(7);
+        Long userId = tokenValidator.getUserIdByToken(token);
         theUserProxy.isExistUser(userId);
 
-
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
         return theTransactionService.findAllTransactionsByUserId(userId);
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping()
     public ResponseEntity<SuccessResponse> createTransaction(
-            @PathVariable Long userId ,
             @Valid @RequestBody TransactionDTO transactionDTO,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         String token = authorizationHeader.substring(7);
+        Long userId = tokenValidator.getUserIdByToken(token);
         theUserProxy.isExistUser(userId);
-
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
 
         SuccessResponse successResponse = null;
         if(theTransactionService.createTransaction(transactionDTO, userId) != null){

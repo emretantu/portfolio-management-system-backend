@@ -30,37 +30,27 @@ public class AssetController {
 
 
 
-    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public List<AssetDTO> retrieveAssetsByUserId(
-            @PathVariable Long userId,
             @RequestHeader("Authorization") String authorizationHeader
     ){
-
         String token = authorizationHeader.substring(7);
-
+        Long userId = tokenValidator.getUserIdByToken(token);
         theUserProxy.isExistUser(userId);
 
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
-
         return theAssetService.findAssetsByUserId(userId);
-
-
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping()
     public ResponseEntity<AssetPostResponse> createAsset(
-            @PathVariable Long userId,
             @Valid @RequestBody AssetDTO assetDTO,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         String token = authorizationHeader.substring(7);
+        Long userId = tokenValidator.getUserIdByToken(token);
         theUserProxy.isExistUser(userId);
-
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
 
         AssetPostResponse assetPostResponse  = null;
         Asset asset = theAssetService.createAsset(assetDTO, userId);
@@ -87,8 +77,4 @@ public class AssetController {
 
     }
 
-    @GetMapping
-    public List<Asset> retrieveAllAssets(){
-        return theAssetService.findAll();
-    }
 }

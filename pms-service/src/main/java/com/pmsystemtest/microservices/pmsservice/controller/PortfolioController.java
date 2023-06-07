@@ -32,43 +32,33 @@ public class PortfolioController {
     private final TokenValidator tokenValidator;
 
 
-    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public List<PortfolioShareTransactionDTO> retrievePortfolioByUser(
-            @PathVariable Long userId,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         // check if user exists by connect user-info-service
         String token = authorizationHeader.substring(7);
 
-        boolean status = theUserProxy.isExistUser(userId);
-        if(!status){
-            throw new RuntimeException("hatali giris");
-        }
+        Long userId = tokenValidator.getUserIdByToken(token);
 
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
+        theUserProxy.isExistUser(userId);
 
         return thePortfolioService.getAllPortfolioShareTransactionDtos(userId);
 
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<SuccessResponse> createPortfolio(
             @Valid @RequestBody PortfolioRequest portfolioRequest,
-            @PathVariable Long userId,
             @RequestHeader("Authorization") String authorizationHeader
     ){
         String token = authorizationHeader.substring(7);
+        Long userId = tokenValidator.getUserIdByToken(token);
         // check if user exists
-        boolean status = theUserProxy.isExistUser(userId);
-        if(!status){
-            throw new RuntimeException("hatali giris");
-        }
+        theUserProxy.isExistUser(userId);
 
-        if(!tokenValidator.checkTokenByUserId(userId, token)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
-        }
         SuccessResponse successResponse = null;
         if(thePortfolioService.createPortfolio(portfolioRequest, userId) != null){
             successResponse = SuccessResponse.builder()

@@ -23,4 +23,16 @@ public class TokenValidator {
         return userId == userIdResponse.getUserId();
 
     }
+
+    public Long getUserIdByToken(String token){
+
+        TokenRequest tokenRequest = TokenRequest.builder()
+                .token(token)
+                .build();
+
+        UserIdResponse userIdResponse = userProxy.findUserIdByToken(tokenRequest).getBody();
+
+        return userIdResponse.getUserId();
+
+    }
 }

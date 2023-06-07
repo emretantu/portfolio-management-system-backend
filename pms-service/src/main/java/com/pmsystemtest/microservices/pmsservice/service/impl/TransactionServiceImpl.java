@@ -63,7 +63,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction createTransaction(TransactionDTO transactionDTO, Long userId) {
+    public Transaction createTransaction(
+            TransactionDTO transactionDTO,
+            Long userId
+    ) {
         Optional<Portfolio> portfolioOptional = thePortfolioRepository.findByUserIdAndId(userId, transactionDTO.getPortfolioId());
         Portfolio portfolio = null;
         if(portfolioOptional.isPresent()){
@@ -139,7 +142,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction deleteTransactionById(Long transactionId) {
+    public Transaction deleteTransactionById(
+            Long transactionId
+    ) {
 
         Optional<Transaction> transactionOptional = theTransactionRepository.findById(transactionId);
         Transaction transaction = null;

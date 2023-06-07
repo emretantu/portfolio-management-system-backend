@@ -28,6 +28,9 @@ public class AssetTypeServiceImpl implements AssetTypeService {
     @Override
     public List<AssetType> findAllAssetTypesByUserId(Long userId) {
         List<Asset> assets = theAssetRepository.findAssetsByUserId(userId);
+        if(assets.isEmpty()){
+            throw new AssetNotFoundException();
+        }
         Set<AssetType> assetTypes = new HashSet<>();
         for(Asset asset : assets){
             assetTypes.add(asset.getAssetType());
